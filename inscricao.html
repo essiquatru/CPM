@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Inscrever seu time</title>
+  <style>
+    :root{--bg:#f6f7fb;--card:#ffffff;--muted:#6b7280;--primary:#0d6efd;--danger:#dc3545}
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;line-height:1.4;margin:0;background:var(--bg);color:#111}
+    .container{max-width:1100px;margin:32px auto;padding:16px}
+    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+    a.home{color:var(--primary);text-decoration:none;font-weight:600}
+
+    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(15,15,20,.06)}
+    h1{margin:0 0 12px;font-size:22px}
+
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:900px){.grid{grid-template-columns:360px 1fr}}
+
+    /* Upload area */
+    .upload{border:2px dashed #e6e9ef;border-radius:8px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+    .upload input[type=file]{display:none}
+    .thumb{width:160px;height:160px;border-radius:6px;object-fit:contain;background:#fff;padding:8px;border:1px solid #eee}
+    .hint{font-size:13px;color:var(--muted)}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:0;cursor:pointer}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-ghost{background:transparent;border:1px solid #e6e9ef}
+
+    form .field{margin-bottom:12px}
+    label{display:block;font-weight:600;margin-bottom:6px}
+    input[type=text], input[type=number], textarea, select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;background:#fff}
+    textarea{min-height:90px}
+
+    .players{display:flex;flex-direction:column;gap:8px}
+    .player{display:grid;grid-template-columns:1fr 1fr 140px 40px;gap:8px;align-items:center;padding:8px;border-radius:8px;background:#fbfcff;border:1px solid #f1f3f7}
+    .player .positions{display:flex;gap:6px;flex-wrap:wrap}
+    .controls{display:flex;gap:8px;align-items:center}
+
+    .muted{color:var(--muted);font-size:13px}
+    .error{color:var(--danger);font-weight:600;font-size:13px}
+
+    .footer-actions{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:12px}
+    .right{display:flex;gap:8px}
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center}
+    .modal{background:#fff;padding:24px;border-radius:12px;max-width:520px;width:92%}
+    .show{display:flex}
+
+    .small{font-size:13px;color:var(--muted)}
+
+    /* accessibility focus */
+    button:focus,input:focus,textarea:focus{outline:3px solid rgba(13,110,253,.15);outline-offset:2px}
+
+    .spinner{border:3px solid #f3f3f3;border-top:3px solid var(--primary);border-radius:50%;width:18px;height:18px;animation:spin .9s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="/" class="home">← Voltar à página principal</a>
+    </header>
+
+    <main class="grid">
+      <!-- esquerda: upload -->
+      <section class="card">
+        <h1>Inscrever seu time</h1>
+        <p class="small">Preencha os dados do clube, carregue a logo (PNG recomendado) e adicione entre 6 e 10 jogadores.</p>
+        <div id="uploadCard" class="upload" aria-hidden="false">
+          <img id="logoPreview" class="thumb" alt="Pré-visualização da logo" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==">
+          <div>
+            <div style="margin-bottom:8px"><button id="chooseFile" type="button" class="btn btn-ghost">Selecionar logo</button></div>
+            <div><button id="removeFile" type="button" class="btn">Remover</button></div>
+          </div>
+          <p class="hint">PNG preferido • Máx 5MB • Tipos: png, jpg, jpeg, webp</p>
+          <input id="logoInput" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Logo do clube" />
+          <p id="logoError" class="error" style="display:none"></p>
+        </div>
+      </section>
+
+      <!-- direita: formulário -->
+      <section class="card" aria-labelledby="formTitle">
+        <form id="teamForm" novalidate>
+          <div class="field">
+            <label for="clubName">Nome do Clube *</label>
+            <input id="clubName" name="name" type="text" required />
+            <div id="clubNameError" class="error" style="display:none"></div>
+          </div>
+
+          <fieldset style="border:0;padding:0;margin:0">
+            <legend style="font-weight:700;margin-bottom:8px">ADM (Administradores)</legend>
+            <div class="field"><label for="owner">Dono *</label><input id="owner" name="owner" type="text" required><div id="ownerError" class="error" style="display:none"></div></div>
+            <div class="field"><label for="captain">Capitão *</label><input id="captain" name="captain" type="text" required><div id="captainError" class="error" style="display:none"></div></div>
+            <div class="field"><label for="coach">Técnico (opcional)</label><input id="coach" name="coach" type="text"></div>
+          </fieldset>
+
+          <hr style="margin:12px 0;border:none;border-top:1px solid #eef2f6">
+
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong>Jogadores</strong>
+            <span id="playersCount" class="muted">0 de 10</span>
+          </div>
+
+          <div id="players" class="players"></div>
+
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button id="addPlayer" type="button" class="btn btn-ghost">Adicionar jogador</button>
+            <div class="small muted">Mínimo 6, máximo 10</div>
+          </div>
+
+          <div class="field" style="margin-top:14px">
+            <label for="notes">Observações (opcional)</label>
+            <textarea id="notes" name="notes"></textarea>
+          </div>
+
+          <div class="footer-actions">
+            <div class="small muted">Ao enviar, seus dados serão recebidos e analisados.</div>
+            <div class="right">
+              <button id="submitBtn" class="btn btn-primary" type="submit">Enviar inscrição</button>
+            </div>
+          </div>
+
+          <p id="formError" class="error" style="display:none;margin-top:8px"></p>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- modal de sucesso/feedback -->
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal card">
+      <h2 id="modalTitle">Inscrição enviada</h2>
+      <p id="modalMsg">Seus dados foram recebidos e estão sendo analisados. Você será notificado por e-mail se precisar.</p>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <a href="/" class="btn btn-ghost">Voltar à página principal</a>
+        <button id="closeModal" class="btn btn-primary">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /************ CONFIG ************/
+    const API_BASE = '/api'; // ajuste para seu backend, ex: https://seusite.com/api
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+    const ACCEPTED_TYPES = ['image/png','image/jpeg','image/webp'];
+    /********** FIM CONFIG **********/
+
+    // elementos
+    const logoInput = document.getElementById('logoInput');
+    const logoPreview = document.getElementById('logoPreview');
+    const chooseFile = document.getElementById('chooseFile');
+    const removeFile = document.getElementById('removeFile');
+    const logoError = document.getElementById('logoError');
+
+    const teamForm = document.getElementById('teamForm');
+    const playersEl = document.getElementById('players');
+    const addPlayerBtn = document.getElementById('addPlayer');
+    const playersCount = document.getElementById('playersCount');
+    const submitBtn = document.getElementById('submitBtn');
+    const formError = document.getElementById('formError');
+
+    const modal = document.getElementById('modal');
+    const closeModal = document.getElementById('closeModal');
+
+    let currentSeason = null;
+
+    // helpers
+    function formatDateBR(iso){
+      try{ const d = new Date(iso); return d.toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo'}); }catch(e){return iso}
+    }
+
+    async function checkSeason(){
+      try{
+        const res = await fetch(API_BASE + '/seasons/current');
+        if(res.status === 200){
+          const data = await res.json();
+          if(data){ currentSeason = data; enableForm(true); return; }
+          // caso 200 com null
+        }
+        // 403/404 etc
+        const body = await res.json().catch(()=>null);
+        let msg = 'Inscrições estão fechadas';
+        if(body && body.nextOpen) msg += '. Próxima abertura: ' + formatDateBR(body.nextOpen);
+        showSeasonClosed(msg);
+      }catch(err){
+        // se backend offline, liberar envio em dev, mas mostrar aviso
+        console.warn('Erro ao checar season', err);
+        showSeasonClosed('Não foi possível verificar período de inscrições. Tente novamente mais tarde.');
+      }
+    }
+
+    function enableForm(yes){
+      const elements = teamForm.querySelectorAll('input,textarea,button');
+      elements.forEach(el => el.disabled = !yes);
+      // always allow remove file UI to function
+      chooseFile.disabled = !yes;
+    }
+
+    function showSeasonClosed(msg){
+      enableForm(false);
+      // intercepta o clique do botão de inscrição e mostra aviso
+      submitBtn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        alert(msg + '\n\nInscrições geralmente abrem entre dia 1 às 18h e dia 5 às 18h (horário de Brasília).');
+      }, {once:true});
+    }
+
+    // file input handlers
+    chooseFile.addEventListener('click', ()=> logoInput.click());
+    logoInput.addEventListener('change', handleFileSelect);
+    removeFile.addEventListener('click', () => { logoInput.value = ''; logoPreview.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='; logoError.style.display='none'; });
+
+    function handleFileSelect(e){
+      const f = e.target.files[0];
+      if(!f) return;
+      if(!ACCEPTED_TYPES.includes(f.type)){
+        logoError.textContent = 'Tipo de arquivo inválido.'; logoError.style.display='block'; logoInput.value=''; return;
+      }
+      if(f.size > MAX_FILE_SIZE){
+        logoError.textContent = 'Arquivo muito grande. Máx 5MB.'; logoError.style.display='block'; logoInput.value=''; return;
+      }
+      logoError.style.display='none';
+      const reader = new FileReader();
+      reader.onload = (ev)=>{ logoPreview.src = ev.target.result; }
+      reader.readAsDataURL(f);
+    }
+
+    // players dynamic list
+    function createPlayer(index, data={id:'',nick:'',positions:[]}){
+      const wrapper = document.createElement('div'); wrapper.className='player'; wrapper.dataset.index = index;
+
+      const idIn = document.createElement('input'); idIn.type='text'; idIn.name = `player_${index}_id`; idIn.placeholder='ID'; idIn.value = data.id || '';
+      const nickIn = document.createElement('input'); nickIn.type='text'; nickIn.name = `player_${index}_nick`; nickIn.placeholder='Nick'; nickIn.value = data.nick || '';
+      const posWrap = document.createElement('div'); posWrap.className='positions';
+      ['GL','VL','PV'].forEach(p=>{
+        const label = document.createElement('label'); label.style.fontWeight='600'; label.style.fontSize='13px';
+        const cb = document.createElement('input'); cb.type='checkbox'; cb.name = `player_${index}_pos`; cb.value = p; if(data.positions && data.positions.includes(p)) cb.checked = true; cb.style.marginRight='6px';
+        label.appendChild(cb);
+        label.appendChild(document.createTextNode(p));
+        posWrap.appendChild(label);
+      });
+
+      const removeBtn = document.createElement('button'); removeBtn.type='button'; removeBtn.className='btn'; removeBtn.textContent='–'; removeBtn.title='Remover jogador';
+      removeBtn.addEventListener('click', ()=>{ removePlayer(wrapper); });
+
+      wrapper.appendChild(idIn); wrapper.appendChild(nickIn); wrapper.appendChild(posWrap); wrapper.appendChild(removeBtn);
+
+      return wrapper;
+    }
+
+    function renderPlayers(list=[]){
+      playersEl.innerHTML='';
+      list.forEach((p,i)=> playersEl.appendChild(createPlayer(i,p)));
+      updatePlayersCount();
+    }
+
+    function updatePlayersCount(){
+      const count = playersEl.children.length; playersCount.textContent = `${count} de 10`;
+      addPlayerBtn.disabled = count >= 10;
+    }
+
+    function addPlayer(data){
+      const count = playersEl.children.length;
+      if(count >= 10) return;
+      playersEl.appendChild(createPlayer(count, data));
+      updatePlayersCount();
+    }
+
+    function removePlayer(node){
+      const count = playersEl.children.length;
+      if(count <= 6){ alert('É necessário ao menos 6 jogadores.'); return; }
+      node.remove();
+      // reindex
+      Array.from(playersEl.children).forEach((child,i)=> child.dataset.index = i);
+      updatePlayersCount();
+    }
+
+    addPlayerBtn.addEventListener('click', ()=> addPlayer());
+
+    // inicializar com 6 jogadores vazios
+    for(let i=0;i<6;i++) addPlayer();
+
+    // validações
+    function validateForm(){
+      formError.style.display='none';
+      const name = document.getElementById('clubName').value.trim();
+      const owner = document.getElementById('owner').value.trim();
+      const captain = document.getElementById('captain').value.trim();
+      if(!name){ document.getElementById('clubNameError').textContent='Obrigatório'; document.getElementById('clubNameError').style.display='block'; return false; } else document.getElementById('clubNameError').style.display='none';
+      if(!owner){ document.getElementById('ownerError').textContent='Obrigatório'; document.getElementById('ownerError').style.display='block'; return false; } else document.getElementById('ownerError').style.display='none';
+      if(!captain){ document.getElementById('captainError').textContent='Obrigatório'; document.getElementById('captainError').style.display='block'; return false; } else document.getElementById('captainError').style.display='none';
+
+      const count = playersEl.children.length;
+      if(count < 6 || count > 10){ formError.textContent = 'Número de jogadores inválido (6–10).'; formError.style.display='block'; return false; }
+
+      // validate each player
+      for(const node of playersEl.children){
+        const id = node.querySelector('input[type=text]').value.trim();
+        const nick = node.querySelectorAll('input[type=text]')[1].value.trim();
+        const checkboxes = node.querySelectorAll('input[type=checkbox]');
+        const anyPos = Array.from(checkboxes).some(cb=>cb.checked);
+        if(!id || !nick){ formError.textContent = 'Cada jogador precisa de ID e Nick.'; formError.style.display='block'; return false; }
+        if(!anyPos){ formError.textContent = 'Marque ao menos uma posição para cada jogador.'; formError.style.display='block'; return false; }
+      }
+
+      // logo
+      if(!logoInput.files[0]){ formError.textContent = 'A logo do clube é obrigatória.'; formError.style.display='block'; return false; }
+      const f = logoInput.files[0];
+      if(!ACCEPTED_TYPES.includes(f.type) || f.size > MAX_FILE_SIZE){ formError.textContent = 'Arquivo inválido. Veja os requisitos da logo.'; formError.style.display='block'; return false; }
+
+      return true;
+    }
+
+    // submit
+    teamForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      formError.style.display='none';
+      if(!validateForm()) return;
+
+      // build players array
+      const players = Array.from(playersEl.children).map(node=>{
+        const inputs = node.querySelectorAll('input[type=text]');
+        const id = inputs[0].value.trim();
+        const nick = inputs[1].value.trim();
+        const positions = Array.from(node.querySelectorAll('input[type=checkbox]')).filter(cb=>cb.checked).map(cb=>cb.value);
+        return { id, nick, positions };
+      });
+
+      const fd = new FormData();
+      fd.append('logo', logoInput.files[0]);
+      fd.append('name', document.getElementById('clubName').value.trim());
+      fd.append('owner', document.getElementById('owner').value.trim());
+      fd.append('captain', document.getElementById('captain').value.trim());
+      fd.append('coach', document.getElementById('coach').value.trim());
+      fd.append('players', JSON.stringify(players));
+      if(currentSeason && currentSeason._id) fd.append('seasonId', currentSeason._id);
+
+      // send
+      submitBtn.disabled = true;
+      const origText = submitBtn.textContent;
+      submitBtn.innerHTML = '<span class="spinner"></span>';
+      try{
+        const res = await fetch(API_BASE + '/teams', { method:'POST', body: fd });
+        const body = await res.json().catch(()=>null);
+        if(res.status === 201){
+          openModal('Inscrição enviada','Seus dados foram recebidos e estão sendo analisados.');
+        } else if(res.status === 403){
+          const m = (body && body.message) ? body.message : 'Inscrições fechadas.';
+          alert(m + '\n\n' + (body && body.nextOpen ? ('Próxima abertura: ' + formatDateBR(body.nextOpen)) : ''));
+        } else {
+          const m = (body && body.message) ? body.message : ('Erro: ' + res.status);
+          formError.textContent = m; formError.style.display='block';
+        }
+      }catch(err){
+        console.error(err);
+        formError.textContent = 'Erro ao enviar. Conecte-se à internet e tente novamente.'; formError.style.display='block';
+      } finally{
+        submitBtn.disabled = false; submitBtn.textContent = origText;
+      }
+    });
+
+    function openModal(title,msg){
+      modal.querySelector('#modalTitle').textContent = title;
+      modal.querySelector('#modalMsg').textContent = msg;
+      modal.classList.add('show'); modal.setAttribute('aria-hidden','false');
+    }
+    function closeModalFn(){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+    closeModal.addEventListener('click', closeModalFn);
+
+    // inicialização
+    (async function init(){
+      // desabilita form até checar season
+      enableForm(false);
+      await checkSeason();
+    })();
+
+  </script>
+</body>
+</html>
