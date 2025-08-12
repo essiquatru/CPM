@@ -1,382 +1,256 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Inscrever seu time</title>
-  <style>
-    :root{--bg:#f6f7fb;--card:#ffffff;--muted:#6b7280;--primary:#0d6efd;--danger:#dc3545}
-    *{box-sizing:border-box}
-    body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;line-height:1.4;margin:0;background:var(--bg);color:#111}
-    .container{max-width:1100px;margin:32px auto;padding:16px}
-    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
-    a.home{color:var(--primary);text-decoration:none;font-weight:600}
-
-    .card{background:var(--card);padding:18px;border-radius:12px;box-shadow:0 6px 18px rgba(15,15,20,.06)}
-    h1{margin:0 0 12px;font-size:22px}
-
-    .grid{display:grid;grid-template-columns:1fr;gap:16px}
-    @media(min-width:900px){.grid{grid-template-columns:360px 1fr}}
-
-    /* Upload area */
-    .upload{border:2px dashed #e6e9ef;border-radius:8px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
-    .upload input[type=file]{display:none}
-    .thumb{width:160px;height:160px;border-radius:6px;object-fit:contain;background:#fff;padding:8px;border:1px solid #eee}
-    .hint{font-size:13px;color:var(--muted)}
-    .btn{display:inline-block;padding:10px 14px;border-radius:10px;border:0;cursor:pointer}
-    .btn-primary{background:var(--primary);color:#fff}
-    .btn-ghost{background:transparent;border:1px solid #e6e9ef}
-
-    form .field{margin-bottom:12px}
-    label{display:block;font-weight:600;margin-bottom:6px}
-    input[type=text], input[type=number], textarea, select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;background:#fff}
-    textarea{min-height:90px}
-
-    .players{display:flex;flex-direction:column;gap:8px}
-    .player{display:grid;grid-template-columns:1fr 1fr 140px 40px;gap:8px;align-items:center;padding:8px;border-radius:8px;background:#fbfcff;border:1px solid #f1f3f7}
-    .player .positions{display:flex;gap:6px;flex-wrap:wrap}
-    .controls{display:flex;gap:8px;align-items:center}
-
-    .muted{color:var(--muted);font-size:13px}
-    .error{color:var(--danger);font-weight:600;font-size:13px}
-
-    .footer-actions{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:12px}
-    .right{display:flex;gap:8px}
-
-    /* modal */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.45);display:none;align-items:center;justify-content:center}
-    .modal{background:#fff;padding:24px;border-radius:12px;max-width:520px;width:92%}
-    .show{display:flex}
-
-    .small{font-size:13px;color:var(--muted)}
-
-    /* accessibility focus */
-    button:focus,input:focus,textarea:focus{outline:3px solid rgba(13,110,253,.15);outline-offset:2px}
-
-    .spinner{border:3px solid #f3f3f3;border-top:3px solid var(--primary);border-radius:50%;width:18px;height:18px;animation:spin .9s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscrever seu time - CPM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="inscricao.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <a href="/" class="home">← Voltar à página principal</a>
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <img src="cpm.png" alt="CPM - Campeonato Paulista de MamoBall" class="logo-image">
+                <div class="logo-text">
+                    <span class="logo-subtitle">Campeonato Paulista de MamoBall</span>
+                </div>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="back-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m15 18-6-6 6-6"/>
+                    </svg>
+                    <span>Voltar</span>
+                </a>
+            </nav>
+        </div>
     </header>
 
-    <main class="grid">
-      <!-- esquerda: upload -->
-      <section class="card">
-        <h1>Inscrever seu time</h1>
-        <p class="small">Preencha os dados do clube, carregue a logo (PNG recomendado) e adicione entre 6 e 10 jogadores.</p>
-        <div id="uploadCard" class="upload" aria-hidden="false">
-          <img id="logoPreview" class="thumb" alt="Pré-visualização da logo" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==">
-          <div>
-            <div style="margin-bottom:8px"><button id="chooseFile" type="button" class="btn btn-ghost">Selecionar logo</button></div>
-            <div><button id="removeFile" type="button" class="btn">Remover</button></div>
-          </div>
-          <p class="hint">PNG preferido • Máx 5MB • Tipos: png, jpg, jpeg, webp</p>
-          <input id="logoInput" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Logo do clube" />
-          <p id="logoError" class="error" style="display:none"></p>
-        </div>
-      </section>
-
-      <!-- direita: formulário -->
-      <section class="card" aria-labelledby="formTitle">
-        <form id="teamForm" novalidate>
-          <div class="field">
-            <label for="clubName">Nome do Clube *</label>
-            <input id="clubName" name="name" type="text" required />
-            <div id="clubNameError" class="error" style="display:none"></div>
-          </div>
-
-          <fieldset style="border:0;padding:0;margin:0">
-            <legend style="font-weight:700;margin-bottom:8px">ADM (Administradores)</legend>
-            <div class="field"><label for="owner">Dono *</label><input id="owner" name="owner" type="text" required><div id="ownerError" class="error" style="display:none"></div></div>
-            <div class="field"><label for="captain">Capitão *</label><input id="captain" name="captain" type="text" required><div id="captainError" class="error" style="display:none"></div></div>
-            <div class="field"><label for="coach">Técnico (opcional)</label><input id="coach" name="coach" type="text"></div>
-          </fieldset>
-
-          <hr style="margin:12px 0;border:none;border-top:1px solid #eef2f6">
-
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <strong>Jogadores</strong>
-            <span id="playersCount" class="muted">0 de 10</span>
-          </div>
-
-          <div id="players" class="players"></div>
-
-          <div style="display:flex;gap:8px;margin-top:8px">
-            <button id="addPlayer" type="button" class="btn btn-ghost">Adicionar jogador</button>
-            <div class="small muted">Mínimo 6, máximo 10</div>
-          </div>
-
-          <div class="field" style="margin-top:14px">
-            <label for="notes">Observações (opcional)</label>
-            <textarea id="notes" name="notes"></textarea>
-          </div>
-
-          <div class="footer-actions">
-            <div class="small muted">Ao enviar, seus dados serão recebidos e analisados.</div>
-            <div class="right">
-              <button id="submitBtn" class="btn btn-primary" type="submit">Enviar inscrição</button>
+    <main class="inscription-main">
+        <div class="container">
+            <div class="inscription-header">
+                <div class="inscription-badge">
+                    <span>🏆 Temporada 2025</span>
+                </div>
+                <h1 class="inscription-title">Inscrever seu time</h1>
+                <p class="inscription-subtitle">
+                    Preencha os dados do clube, carregue a logo e adicione entre 6 e 10 jogadores para participar da CPM.
+                </p>
             </div>
-          </div>
 
-          <p id="formError" class="error" style="display:none;margin-top:8px"></p>
-        </form>
-      </section>
+            <form id="teamForm" class="inscription-form" novalidate>
+                <div class="form-grid">
+                    <!-- Coluna Esquerda: Upload da Logo -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h2>Logo do Clube</h2>
+                            <p>Carregue a logo oficial do seu time</p>
+                        </div>
+                        
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-content">
+                                <div class="upload-icon">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7,10 12,15 17,10"/>
+                                        <line x1="12" y1="15" x2="12" y2="3"/>
+                                    </svg>
+                                </div>
+                                <div class="upload-text">
+                                    <h3>Selecione uma imagem</h3>
+                                    <p>PNG, JPG ou WebP • Máximo 5MB</p>
+                                </div>
+                                <button type="button" class="upload-btn" id="chooseFile">
+                                    Escolher arquivo
+                                </button>
+                            </div>
+                            
+                            <div class="upload-preview" id="uploadPreview" style="display: none;">
+                                <img id="logoPreview" alt="Preview da logo" class="preview-image">
+                                <div class="preview-actions">
+                                    <button type="button" class="preview-btn" id="changeFile">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 2v6h-6"/>
+                                            <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+                                            <path d="M3 22v-6h6"/>
+                                            <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                                        </svg>
+                                        Alterar
+                                    </button>
+                                    <button type="button" class="preview-btn danger" id="removeFile">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3,6 5,6 21,6"/>
+                                            <path d="M19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"/>
+                                        </svg>
+                                        Remover
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <input id="logoInput" type="file" accept="image/png,image/jpeg,image/webp" aria-label="Logo do clube" style="display: none;" />
+                            <div id="logoError" class="error-message" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Coluna Direita: Dados do Clube -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <h2>Dados do Clube</h2>
+                            <p>Informações administrativas do time</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="clubName" class="form-label">
+                                Nome do Clube <span class="required">*</span>
+                            </label>
+                            <input 
+                                id="clubName" 
+                                name="name" 
+                                type="text" 
+                                class="form-input" 
+                                placeholder="Digite o nome do seu clube"
+                                required 
+                            />
+                            <div id="clubNameError" class="error-message" style="display: none;"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Administradores</label>
+                            <div class="admin-grid">
+                                <div class="form-group">
+                                    <label for="owner" class="form-label">
+                                        Dono <span class="required">*</span>
+                                    </label>
+                                    <input 
+                                        id="owner" 
+                                        name="owner" 
+                                        type="text" 
+                                        class="form-input" 
+                                        placeholder="Nome do dono"
+                                        required 
+                                    />
+                                    <div id="ownerError" class="error-message" style="display: none;"></div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="captain" class="form-label">
+                                        Capitão <span class="required">*</span>
+                                    </label>
+                                    <input 
+                                        id="captain" 
+                                        name="captain" 
+                                        type="text" 
+                                        class="form-input" 
+                                        placeholder="Nome do capitão"
+                                        required 
+                                    />
+                                    <div id="captainError" class="error-message" style="display: none;"></div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="coach" class="form-label">
+                                        Técnico <span class="optional">(opcional)</span>
+                                    </label>
+                                    <input 
+                                        id="coach" 
+                                        name="coach" 
+                                        type="text" 
+                                        class="form-input" 
+                                        placeholder="Nome do técnico"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes" class="form-label">
+                                Observações <span class="optional">(opcional)</span>
+                            </label>
+                            <textarea 
+                                id="notes" 
+                                name="notes" 
+                                class="form-textarea" 
+                                placeholder="Informações adicionais sobre o time..."
+                                rows="3"
+                            ></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção de Jogadores -->
+                <div class="form-section players-section">
+                    <div class="section-header">
+                        <div class="section-title-group">
+                            <h2>Jogadores</h2>
+                            <span class="players-counter" id="playersCounter">0 de 10</span>
+                        </div>
+                        <p>Adicione entre 6 e 10 jogadores ao seu time</p>
+                    </div>
+
+                    <div class="players-container">
+                        <div id="players" class="players-list"></div>
+                        
+                        <div class="players-actions">
+                            <button type="button" class="add-player-btn" id="addPlayer">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="12" y1="5" x2="12" y2="19"/>
+                                    <line x1="5" y1="12" x2="19" y2="12"/>
+                                </svg>
+                                Adicionar jogador
+                            </button>
+                            <span class="players-hint">Mínimo 6, máximo 10 jogadores</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mensagens de erro -->
+                <div id="formError" class="form-error" style="display: none;"></div>
+
+                <!-- Ações do formulário -->
+                <div class="form-actions">
+                    <div class="form-info">
+                        <p>Ao enviar, seus dados serão recebidos e analisados pela nossa equipe.</p>
+                        <a href="#" class="privacy-link">Política de privacidade</a>
+                    </div>
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span class="btn-text">Enviar inscrição</span>
+                        <div class="btn-spinner" style="display: none;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                            </svg>
+                        </div>
+                    </button>
+                </div>
+            </form>
+        </div>
     </main>
-  </div>
 
-  <!-- modal de sucesso/feedback -->
-  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal card">
-      <h2 id="modalTitle">Inscrição enviada</h2>
-      <p id="modalMsg">Seus dados foram recebidos e estão sendo analisados. Você será notificado por e-mail se precisar.</p>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
-        <a href="/" class="btn btn-ghost">Voltar à página principal</a>
-        <button id="closeModal" class="btn btn-primary">Fechar</button>
-      </div>
+    <!-- Modal de sucesso -->
+    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon success">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20,6 9,17 4,12"/>
+                    </svg>
+                </div>
+                <h2 id="modalTitle" class="modal-title">Inscrição enviada!</h2>
+            </div>
+            <div class="modal-body">
+                <p id="modalMsg" class="modal-message">
+                    Seus dados foram recebidos e estão sendo analisados. Você receberá um e-mail com mais informações em breve.
+                </p>
+            </div>
+            <div class="modal-actions">
+                <a href="index.html" class="modal-btn primary">Voltar à página principal</a>
+                <button id="closeModal" class="modal-btn secondary">Fechar</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    /************ CONFIG ************/
-    const API_BASE = '/api'; // ajuste para seu backend, ex: https://seusite.com/api
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-    const ACCEPTED_TYPES = ['image/png','image/jpeg','image/webp'];
-    /********** FIM CONFIG **********/
-
-    // elementos
-    const logoInput = document.getElementById('logoInput');
-    const logoPreview = document.getElementById('logoPreview');
-    const chooseFile = document.getElementById('chooseFile');
-    const removeFile = document.getElementById('removeFile');
-    const logoError = document.getElementById('logoError');
-
-    const teamForm = document.getElementById('teamForm');
-    const playersEl = document.getElementById('players');
-    const addPlayerBtn = document.getElementById('addPlayer');
-    const playersCount = document.getElementById('playersCount');
-    const submitBtn = document.getElementById('submitBtn');
-    const formError = document.getElementById('formError');
-
-    const modal = document.getElementById('modal');
-    const closeModal = document.getElementById('closeModal');
-
-    let currentSeason = null;
-
-    // helpers
-    function formatDateBR(iso){
-      try{ const d = new Date(iso); return d.toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo'}); }catch(e){return iso}
-    }
-
-    async function checkSeason(){
-      try{
-        const res = await fetch(API_BASE + '/seasons/current');
-        if(res.status === 200){
-          const data = await res.json();
-          if(data){ currentSeason = data; enableForm(true); return; }
-          // caso 200 com null
-        }
-        // 403/404 etc
-        const body = await res.json().catch(()=>null);
-        let msg = 'Inscrições estão fechadas';
-        if(body && body.nextOpen) msg += '. Próxima abertura: ' + formatDateBR(body.nextOpen);
-        showSeasonClosed(msg);
-      }catch(err){
-        // se backend offline, liberar envio em dev, mas mostrar aviso
-        console.warn('Erro ao checar season', err);
-        showSeasonClosed('Não foi possível verificar período de inscrições. Tente novamente mais tarde.');
-      }
-    }
-
-    function enableForm(yes){
-      const elements = teamForm.querySelectorAll('input,textarea,button');
-      elements.forEach(el => el.disabled = !yes);
-      // always allow remove file UI to function
-      chooseFile.disabled = !yes;
-    }
-
-    function showSeasonClosed(msg){
-      enableForm(false);
-      // intercepta o clique do botão de inscrição e mostra aviso
-      submitBtn.addEventListener('click', (e)=>{
-        e.preventDefault();
-        alert(msg + '\n\nInscrições geralmente abrem entre dia 1 às 18h e dia 5 às 18h (horário de Brasília).');
-      }, {once:true});
-    }
-
-    // file input handlers
-    chooseFile.addEventListener('click', ()=> logoInput.click());
-    logoInput.addEventListener('change', handleFileSelect);
-    removeFile.addEventListener('click', () => { logoInput.value = ''; logoPreview.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='; logoError.style.display='none'; });
-
-    function handleFileSelect(e){
-      const f = e.target.files[0];
-      if(!f) return;
-      if(!ACCEPTED_TYPES.includes(f.type)){
-        logoError.textContent = 'Tipo de arquivo inválido.'; logoError.style.display='block'; logoInput.value=''; return;
-      }
-      if(f.size > MAX_FILE_SIZE){
-        logoError.textContent = 'Arquivo muito grande. Máx 5MB.'; logoError.style.display='block'; logoInput.value=''; return;
-      }
-      logoError.style.display='none';
-      const reader = new FileReader();
-      reader.onload = (ev)=>{ logoPreview.src = ev.target.result; }
-      reader.readAsDataURL(f);
-    }
-
-    // players dynamic list
-    function createPlayer(index, data={id:'',nick:'',positions:[]}){
-      const wrapper = document.createElement('div'); wrapper.className='player'; wrapper.dataset.index = index;
-
-      const idIn = document.createElement('input'); idIn.type='text'; idIn.name = `player_${index}_id`; idIn.placeholder='ID'; idIn.value = data.id || '';
-      const nickIn = document.createElement('input'); nickIn.type='text'; nickIn.name = `player_${index}_nick`; nickIn.placeholder='Nick'; nickIn.value = data.nick || '';
-      const posWrap = document.createElement('div'); posWrap.className='positions';
-      ['GL','VL','PV'].forEach(p=>{
-        const label = document.createElement('label'); label.style.fontWeight='600'; label.style.fontSize='13px';
-        const cb = document.createElement('input'); cb.type='checkbox'; cb.name = `player_${index}_pos`; cb.value = p; if(data.positions && data.positions.includes(p)) cb.checked = true; cb.style.marginRight='6px';
-        label.appendChild(cb);
-        label.appendChild(document.createTextNode(p));
-        posWrap.appendChild(label);
-      });
-
-      const removeBtn = document.createElement('button'); removeBtn.type='button'; removeBtn.className='btn'; removeBtn.textContent='–'; removeBtn.title='Remover jogador';
-      removeBtn.addEventListener('click', ()=>{ removePlayer(wrapper); });
-
-      wrapper.appendChild(idIn); wrapper.appendChild(nickIn); wrapper.appendChild(posWrap); wrapper.appendChild(removeBtn);
-
-      return wrapper;
-    }
-
-    function renderPlayers(list=[]){
-      playersEl.innerHTML='';
-      list.forEach((p,i)=> playersEl.appendChild(createPlayer(i,p)));
-      updatePlayersCount();
-    }
-
-    function updatePlayersCount(){
-      const count = playersEl.children.length; playersCount.textContent = `${count} de 10`;
-      addPlayerBtn.disabled = count >= 10;
-    }
-
-    function addPlayer(data){
-      const count = playersEl.children.length;
-      if(count >= 10) return;
-      playersEl.appendChild(createPlayer(count, data));
-      updatePlayersCount();
-    }
-
-    function removePlayer(node){
-      const count = playersEl.children.length;
-      if(count <= 6){ alert('É necessário ao menos 6 jogadores.'); return; }
-      node.remove();
-      // reindex
-      Array.from(playersEl.children).forEach((child,i)=> child.dataset.index = i);
-      updatePlayersCount();
-    }
-
-    addPlayerBtn.addEventListener('click', ()=> addPlayer());
-
-    // inicializar com 6 jogadores vazios
-    for(let i=0;i<6;i++) addPlayer();
-
-    // validações
-    function validateForm(){
-      formError.style.display='none';
-      const name = document.getElementById('clubName').value.trim();
-      const owner = document.getElementById('owner').value.trim();
-      const captain = document.getElementById('captain').value.trim();
-      if(!name){ document.getElementById('clubNameError').textContent='Obrigatório'; document.getElementById('clubNameError').style.display='block'; return false; } else document.getElementById('clubNameError').style.display='none';
-      if(!owner){ document.getElementById('ownerError').textContent='Obrigatório'; document.getElementById('ownerError').style.display='block'; return false; } else document.getElementById('ownerError').style.display='none';
-      if(!captain){ document.getElementById('captainError').textContent='Obrigatório'; document.getElementById('captainError').style.display='block'; return false; } else document.getElementById('captainError').style.display='none';
-
-      const count = playersEl.children.length;
-      if(count < 6 || count > 10){ formError.textContent = 'Número de jogadores inválido (6–10).'; formError.style.display='block'; return false; }
-
-      // validate each player
-      for(const node of playersEl.children){
-        const id = node.querySelector('input[type=text]').value.trim();
-        const nick = node.querySelectorAll('input[type=text]')[1].value.trim();
-        const checkboxes = node.querySelectorAll('input[type=checkbox]');
-        const anyPos = Array.from(checkboxes).some(cb=>cb.checked);
-        if(!id || !nick){ formError.textContent = 'Cada jogador precisa de ID e Nick.'; formError.style.display='block'; return false; }
-        if(!anyPos){ formError.textContent = 'Marque ao menos uma posição para cada jogador.'; formError.style.display='block'; return false; }
-      }
-
-      // logo
-      if(!logoInput.files[0]){ formError.textContent = 'A logo do clube é obrigatória.'; formError.style.display='block'; return false; }
-      const f = logoInput.files[0];
-      if(!ACCEPTED_TYPES.includes(f.type) || f.size > MAX_FILE_SIZE){ formError.textContent = 'Arquivo inválido. Veja os requisitos da logo.'; formError.style.display='block'; return false; }
-
-      return true;
-    }
-
-    // submit
-    teamForm.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      formError.style.display='none';
-      if(!validateForm()) return;
-
-      // build players array
-      const players = Array.from(playersEl.children).map(node=>{
-        const inputs = node.querySelectorAll('input[type=text]');
-        const id = inputs[0].value.trim();
-        const nick = inputs[1].value.trim();
-        const positions = Array.from(node.querySelectorAll('input[type=checkbox]')).filter(cb=>cb.checked).map(cb=>cb.value);
-        return { id, nick, positions };
-      });
-
-      const fd = new FormData();
-      fd.append('logo', logoInput.files[0]);
-      fd.append('name', document.getElementById('clubName').value.trim());
-      fd.append('owner', document.getElementById('owner').value.trim());
-      fd.append('captain', document.getElementById('captain').value.trim());
-      fd.append('coach', document.getElementById('coach').value.trim());
-      fd.append('players', JSON.stringify(players));
-      if(currentSeason && currentSeason._id) fd.append('seasonId', currentSeason._id);
-
-      // send
-      submitBtn.disabled = true;
-      const origText = submitBtn.textContent;
-      submitBtn.innerHTML = '<span class="spinner"></span>';
-      try{
-        const res = await fetch(API_BASE + '/teams', { method:'POST', body: fd });
-        const body = await res.json().catch(()=>null);
-        if(res.status === 201){
-          openModal('Inscrição enviada','Seus dados foram recebidos e estão sendo analisados.');
-        } else if(res.status === 403){
-          const m = (body && body.message) ? body.message : 'Inscrições fechadas.';
-          alert(m + '\n\n' + (body && body.nextOpen ? ('Próxima abertura: ' + formatDateBR(body.nextOpen)) : ''));
-        } else {
-          const m = (body && body.message) ? body.message : ('Erro: ' + res.status);
-          formError.textContent = m; formError.style.display='block';
-        }
-      }catch(err){
-        console.error(err);
-        formError.textContent = 'Erro ao enviar. Conecte-se à internet e tente novamente.'; formError.style.display='block';
-      } finally{
-        submitBtn.disabled = false; submitBtn.textContent = origText;
-      }
-    });
-
-    function openModal(title,msg){
-      modal.querySelector('#modalTitle').textContent = title;
-      modal.querySelector('#modalMsg').textContent = msg;
-      modal.classList.add('show'); modal.setAttribute('aria-hidden','false');
-    }
-    function closeModalFn(){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
-    closeModal.addEventListener('click', closeModalFn);
-
-    // inicialização
-    (async function init(){
-      // desabilita form até checar season
-      enableForm(false);
-      await checkSeason();
-    })();
-
-  </script>
+    <script src="app.js"></script>
 </body>
 </html>
