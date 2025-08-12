@@ -9,14 +9,20 @@
     text-decoration: none;
     font-weight: 500;
     font-size: 0.875rem;
-    transition: all 0.3s ease;
-    padding: 0.5rem 1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0.75rem 1.25rem;
     border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .back-btn:hover {
     color: var(--text-primary);
-    background: var(--bg-secondary);
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 /* Main da inscrição */
@@ -29,6 +35,9 @@
 .inscription-header {
     text-align: center;
     margin-bottom: 3rem;
+    transform: translateY(30px);
+    opacity: 0;
+    animation: slideUp 0.8s ease forwards 0.2s;
 }
 
 .inscription-badge {
@@ -47,9 +56,22 @@
 
 .inscription-title {
     font-size: 2.5rem;
-    font-weight: 700;
+    font-weight: 800;
     margin-bottom: 1rem;
     color: var(--text-primary);
+    position: relative;
+}
+
+.inscription-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+    border-radius: 2px;
 }
 
 .inscription-subtitle {
@@ -79,6 +101,14 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     border: 1px solid var(--border-light);
+    transition: all 0.4s ease;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUp 0.8s ease forwards 0.4s;
+}
+
+.form-section:nth-child(2) {
+    animation-delay: 0.6s;
 }
 
 .section-header {
@@ -269,6 +299,7 @@
 /* Seção de Jogadores */
 .players-section {
     grid-column: 1 / -1;
+    animation-delay: 0.8s;
 }
 
 .section-title-group {
@@ -453,6 +484,9 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     border: 1px solid var(--border-light);
+    transform: translateY(20px);
+    opacity: 0;
+    animation: slideUp 0.8s ease forwards 1s;
 }
 
 .form-info {
@@ -513,6 +547,13 @@
 @keyframes spin {
     to {
         transform: rotate(360deg);
+    }
+}
+
+@keyframes slideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
